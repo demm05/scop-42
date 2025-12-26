@@ -1,9 +1,16 @@
-# .clang-format
 ---
 BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+---
 IndentWidth: 4
 UseTab: Never
 ColumnLimit: 100
 ---
-Language: Cpp
-Standard: Cpp20
+BreakBeforeBraces: Attach
+FixNamespaceComments: true
+PackConstructorInitializers: Never
+SortIncludes: false
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false

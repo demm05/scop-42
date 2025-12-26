@@ -1,1 +1,3 @@
-int main(void) { return 0; }
+#include <print>
+
+int main(void) { std::println("Hello world"); }
