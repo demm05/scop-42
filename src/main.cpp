@@ -1,5 +1,6 @@
 #include <glad/gl.h>
 
+#include "Logger.h"
 #include "linmath.h"
 #include <GLFW/glfw3.h>
 #include <stddef.h>
@@ -46,6 +47,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 int main(void) {
+  Logger::init();
+
   glfwSetErrorCallback(error_callback);
 
   if (!glfwInit())
