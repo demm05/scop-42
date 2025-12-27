@@ -1,27 +1,29 @@
 BUILD_DIR = build
-BINARY = scop
+BINARY_NAME = scop
+BINARY_PATH = $(BUILD_DIR)/bin/$(BINARY_NAME)
 NUM_CORES = $(shell nproc 2>/dev/null || echo 4)
 
-.PHONY: all build run clean re help
+.PHONY: all build run clean re
 
 all: build
 
 build:
 	@if [ ! -d "$(BUILD_DIR)" ]; then \
-		cmake -S . -B $(BUILD_DIR) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON; \
-		ln -sf ./build/compile_commands.json .; \
+		echo "Configuring CMake..."; \
+		cmake -S . -B $(BUILD_DIR); \
 	fi
-	cmake --build $(BUILD_DIR) -j $(NUM_CORES)
-
-r run: build
-	@./$(BUILD_DIR)/$(BINARY)
-
-c clean:
-	@if [ -d "$(BUILD_DIR)" ]; then \
-		cmake --build $(BUILD_DIR) --target clean; \
+	@if [ -f "$(BUILD_DIR)/compile_commands.json" ]; then \
+		ln -sf "$(BUILD_DIR)/compile_commands.json" .; \
 	fi
+	@cmake --build $(BUILD_DIR) -j $(NUM_CORES)
 
-fclean:
-	rm -rf $(BUILD_DIR)
+run: build
+	@echo "Running $(BINARY_NAME)..."
+	@./$(BINARY_PATH)
 
-re: clean build
+clean:
+	@rm -rf $(BUILD_DIR)
+	@rm -f compile_commands.json
+	@echo "Cleaned build directory."
+
+re: clean all
