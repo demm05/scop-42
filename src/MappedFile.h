@@ -26,7 +26,7 @@ public:
 
 private:
   MappedFile(void *address, size_t length);
-  inline void cleanup() noexcept;
+  void cleanup() noexcept;
 
 private:
   size_t length_;
