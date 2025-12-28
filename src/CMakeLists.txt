@@ -1,10 +1,10 @@
-file(GLOB_RECURSE PROJECT_SOURCES "*.cpp")
+file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "*.cpp")
 
 glad_add_library(glad_gl REPRODUCIBLE API gl:core=4.6)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL glfw glad_gl linmath
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL glfw glad_gl
                                               spdlog::spdlog m)
 
 target_include_directories(
