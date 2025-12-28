@@ -5,9 +5,9 @@ Before you connect anything, you have raw lists of data.
 **1. Geometric Vertices (`v`)**
 
 * [X] **Understand what it is:** A point in 3D space.
-* [ ] **Format check:** Usually `v x y z`. Sometimes `v x y z w` (where `w` is an optional weight, usually defaults to 1.0).
-* [ ] **Decision - Storage:** You need a container that can grow dynamically, as you don't know how many vertices are in the file until you finish reading it.
-* [ ] **Decision - Component Types:** Will you store them as `double` for precision or `float` for memory/GPU usage?
+* [X] **Format check:** Usually `v x y z`. Sometimes `v x y z w` (where `w` is an optional weight, usually defaults to 1.0).
+* [X] **Decision - Storage:** You need a container that can grow dynamically, as you don't know how many vertices are in the file until you finish reading it.
+* [X] **Decision - Component Types:** Will you store them as `double` for precision or `float` for memory/GPU usage?
 
 **2. Texture Coordinates (`vt`)**
 

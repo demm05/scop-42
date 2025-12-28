@@ -1,12 +1,14 @@
 #pragma once
 
 #include <expected>
+#include <filesystem>
 #include <span>
 #include <system_error>
 
 struct MappedFile {
 public:
-  static std::expected<MappedFile, std::error_code> open(char const *filePath);
+  static std::expected<MappedFile, std::error_code>
+  open(std::filesystem::path const &path);
   std::string_view view() const;
   size_t length() const;
 

@@ -1,12 +1,13 @@
 #include "MappedFile.h"
 #include <fcntl.h>
+#include <filesystem>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 std::expected<MappedFile, std::error_code>
-MappedFile::open(char const *filePath) {
-  int fd = ::open(filePath, O_RDONLY);
+MappedFile::open(std::filesystem::path const &path) {
+  int fd = ::open(path.c_str(), O_RDONLY);
   if (fd == -1) {
     return std::unexpected(std::error_code(errno, std::generic_category()));
   }
