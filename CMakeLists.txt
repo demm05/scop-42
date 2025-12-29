@@ -36,14 +36,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
   # Development mode flags (Sanitizers)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Enabling Sanitizers: Address, Undefined Behavior, Leak")
-    add_compile_options(
-      -fsanitize=address,undefined,leak
-      -fno-omit-frame-pointer
-      -g3
-      -D_GLIBCXX_ASSERTIONS
-      -D_GLIBCXX_DEBUG)
-    add_link_options(-fsanitize=address,undefined,leak)
+    message(STATUS "Enabling Sanitizers")
+    set(SAN_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer -g3)
+    add_compile_options(${SAN_FLAGS} -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_DEBUG)
+    add_link_options(${SAN_FLAGS})
   endif()
 endif()
 

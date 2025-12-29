@@ -82,10 +82,18 @@ void ObjectParser::dispatchHandler() {
 
 #define PARSE_CHECK(cond, col, msg)                                            \
   if (!(cond)) {                                                               \
-    CORE_ERROR("Parse Error at {}:{}\n  {}\n  {:>{}}^-- {}", filePath_,        \
-               lineNum_, line_, "", (col), (msg));                             \
+    CORE_WARN("Parse Error at [{}:{}]\n  {}\n  {:>{}}^-- {}", filePath_,       \
+              lineNum_, line_, "", (col), (msg));                              \
     return;                                                                    \
   }
+
+[[nodiscard]] inline constexpr const char *
+skip_spaces(const char *first, const char *last) noexcept {
+  while (first < last && (*first == ' ' || *first == '\t')) {
+    first++;
+  }
+  return first;
+}
 
 void ObjectParser::handleVertex() {
   char const *first = data_.data();
@@ -94,8 +102,7 @@ void ObjectParser::handleVertex() {
   float v[4]{0.0f, 0.0f, 0.0f, 1.0f};
 
   for (int i = 0; i < 4; ++i) {
-    while (first < last && (*first == ' ' || *first == '\t'))
-      first++;
+    first = skip_spaces(first, last);
     if (first == last) {
       PARSE_CHECK(i >= 3, line_.length(), "Missing coordinates");
       break;
@@ -109,7 +116,35 @@ void ObjectParser::handleVertex() {
   vertecies_.emplace_back(v);
 }
 
-void ObjectParser::handleFace() {}
+void ObjectParser::handleFace() {
+  char const *first = data_.data();
+  char const *last = data_.data() + data_.size();
+
+  std::vector<int> indicies;
+  indicies.reserve(4);
+  while (true) {
+    first = skip_spaces(first, last);
+    if (first == last)
+      break;
+    int rawIndex;
+    auto [ptr, ec] = std::from_chars(first, last, rawIndex);
+    PARSE_CHECK(ec == std::errc{}, first - line_.data(), "Invalid face index");
+
+    if (rawIndex > 0) {
+      indicies.push_back(rawIndex - 1);
+    } else if (rawIndex < 0) {
+      indicies.push_back(static_cast<int>(vertecies_.size()) + rawIndex);
+    } else {
+      PARSE_CHECK(false, first - line_.data(), "Index cannot be 0");
+    }
+    first = ptr;
+  }
+  PARSE_CHECK(indicies.size() > 2, line_.length(),
+              "Not enough vertcies to form a triangle");
+  // TODO: addTriangle() or split indicies to triangles
+  // Basiclly each o and g creates new mesh but important it reuses the
+  // vertcies and basicly we push indexes to form a triangle
+}
 void ObjectParser::handleObjectName() {}
 void ObjectParser::handleGroupName() {}
 void ObjectParser::handleSmoothingGroup() {}

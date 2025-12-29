@@ -14,6 +14,17 @@ public:
   Vertex(std::span<const float, 4> v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 };
 
+struct Scene {
+  std::vector<Vertex> vertices;
+
+  struct Mesh {
+    std::string name;
+    std::vector<uint32_t> indices;
+  };
+
+  std::vector<Mesh> meshes;
+};
+
 class ObjectParser {
 public:
   static std::expected<Object, std::error_code>
