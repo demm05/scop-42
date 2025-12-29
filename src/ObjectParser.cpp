@@ -1,10 +1,13 @@
 #include "ObjectParser.h"
 #include "Logger.h"
 #include "MappedFile.h"
+#include <cassert>
+#include <charconv>
 #include <cstdint>
 #include <expected>
 #include <ranges>
 #include <string_view>
+#include <system_error>
 
 namespace {
 
@@ -24,11 +27,12 @@ ObjectParser::parse(std::filesystem::path const &path) {
   auto file = MappedFile::open(path);
   if (!file)
     return std::unexpected(file.error());
-  ObjectParser op(file.value().view());
+  ObjectParser op(path, file.value().view());
   return op.parse();
 }
 
-ObjectParser::ObjectParser(std::string_view file) : file_(file) {}
+ObjectParser::ObjectParser(std::string const &filePath, std::string_view file)
+    : filePath_(filePath), file_(file) {}
 
 std::expected<Object, std::error_code> ObjectParser::parse() {
   for (auto const line_range : file_ | std::views::split('\n')) {
@@ -76,10 +80,40 @@ void ObjectParser::dispatchHandler() {
   // clang-format on
 }
 
-void ObjectParser::handleVertex() {}
+#define PARSE_CHECK(cond, col, msg)                                            \
+  if (!(cond)) {                                                               \
+    CORE_ERROR("Parse Error at {}:{}\n  {}\n  {:>{}}^-- {}", filePath_,        \
+               lineNum_, line_, "", (col), (msg));                             \
+    return;                                                                    \
+  }
+
+void ObjectParser::handleVertex() {
+  char const *first = data_.data();
+  char const *last = data_.data() + data_.size();
+
+  float v[4]{0.0f, 0.0f, 0.0f, 1.0f};
+
+  for (int i = 0; i < 4; ++i) {
+    while (first < last && (*first == ' ' || *first == '\t'))
+      first++;
+    if (first == last) {
+      PARSE_CHECK(i >= 3, line_.length(), "Missing coordinates");
+      break;
+    }
+
+    auto [ptr, ec] = std::from_chars(first, last, v[i]);
+    PARSE_CHECK(ec == std::errc{}, first - line_.data(),
+                std::make_error_code(ec).message());
+    first = ptr;
+  }
+  vertecies_.emplace_back(v);
+}
+
 void ObjectParser::handleFace() {}
 void ObjectParser::handleObjectName() {}
 void ObjectParser::handleGroupName() {}
 void ObjectParser::handleSmoothingGroup() {}
 void ObjectParser::handleMatirialLibrary() {}
 void ObjectParser::handleMaterialName() {}
+
+#undef PARSE_CHECK
