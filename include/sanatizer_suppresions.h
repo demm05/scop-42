@@ -20,7 +20,8 @@ const char *__lsan_default_suppressions() {
          "leak:libgtk-3.so\n"
          "leak:libglib-2.0.so\n"
          "leak:libdecor-gtk.so\n"
-         "leak:libgobject-2.0.so\n";
+         "leak:libgobject-2.0.so\n"
+         "leak:libnss_systemd.so\n";
 }
 
 extern "C" const char *__asan_default_options() {

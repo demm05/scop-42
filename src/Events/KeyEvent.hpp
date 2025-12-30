@@ -1,13 +1,14 @@
 #pragma once
 
-#include "IEvent.h"
-#include "KeyCodes.h"
+#include "IEvent.hpp"
+#include "KeyCodes.hpp"
 
 struct KeyEvent : public IEvent {
   KeyCode Code;
   int Mods;
 
   KeyEvent(KeyCode keycode, int mods) : Code(keycode), Mods(mods) {}
+  MAKE_EVENT_CLASS_CATEGORY(EventCategory::Keyboard | EventCategory::Input);
 };
 
 struct KeyPressEvent : public KeyEvent {

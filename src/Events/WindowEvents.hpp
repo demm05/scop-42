@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IEvent.h"
+#include "IEvent.hpp"
 
 struct WindowResizeEvent : public IEvent {
   unsigned int Width, Height;
@@ -8,9 +8,11 @@ struct WindowResizeEvent : public IEvent {
       : Width(width), Height(height) {}
 
   MAKE_EVENT_CLASS_TYPE(WindowResize)
+  MAKE_EVENT_CLASS_CATEGORY(EventCategory::Window);
 };
 
 struct WindowCloseEvent : public IEvent {
   WindowCloseEvent() = default;
   MAKE_EVENT_CLASS_TYPE(WindowClose)
+  MAKE_EVENT_CLASS_CATEGORY(EventCategory::Window);
 };

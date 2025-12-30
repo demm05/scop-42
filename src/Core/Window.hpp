@@ -67,6 +67,7 @@ private:
                                   int mods);
   static void ScrollCallback(GLFWwindow *, double xoffset, double yoffset);
   static void WindowResizeCallback(GLFWwindow *, int width, int height);
+  static void WindowCloseCallback(GLFWwindow *);
 
 private:
   GLFWwindow *windowHandle_ = nullptr;

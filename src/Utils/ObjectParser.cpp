@@ -1,6 +1,6 @@
-#include "ObjectParser.h"
-#include "Core/Logger.h"
-#include "MappedFile.h"
+#include "Utils/ObjectParser.hpp"
+#include "Core/Logger.hpp"
+#include "Utils/MappedFile.hpp"
 #include <cassert>
 #include <charconv>
 #include <cstdint>

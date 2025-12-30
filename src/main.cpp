@@ -1,5 +1,5 @@
-#include "Core/Application.h"
-#include "Core/Window.h"
+#include "Core/Application.hpp"
+#include "Core/Window.hpp"
 
 int main(void) {
   auto win_prop = Window::Config{

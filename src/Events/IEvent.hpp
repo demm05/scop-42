@@ -16,6 +16,17 @@ enum class EventType {
   MouseScrolled
 };
 
+namespace EventCategory {
+enum Category {
+  None = 0,
+  Window = 1 << 0,     /**< Events related to the OS window */
+  Input = 1 << 1,      /**< Any hardware input  */
+  Keyboard = 1 << 2,   /**< Specific to keyboard button presses */
+  Mouse = 1 << 3,      /**< Specific to mouse movement and scrolling */
+  MouseButton = 1 << 4 /**< Specific to mouse button clicks */
+};
+}
+
 class IEvent {
 public:
   virtual ~IEvent() = default;
@@ -23,8 +34,12 @@ public:
   bool Handled = false;
 
   virtual EventType GetType() const = 0;
+  virtual int GetCategoryFlags() const = 0;
   virtual const char *GetName() const = 0;
   virtual std::string ToString() const { return GetName(); }
+  bool IsInCategory(EventCategory::Category category) {
+    return GetCategoryFlags() & category;
+  }
 };
 
 #define MAKE_EVENT_CLASS_TYPE(type)                                            \
@@ -32,18 +47,5 @@ public:
   virtual EventType GetType() const override { return GetStaticType(); }       \
   virtual const char *GetName() const override { return #type; }
 
-class EventDispatcher {
-public:
-  EventDispatcher(IEvent &event) : m_Event(event) {}
-
-  template <typename T, typename F> bool Dispatch(const F &func) {
-    if (m_Event.GetType() == T::GetStaticType() && !m_Event.Handled) {
-      m_Event.Handled |= func(static_cast<T &>(m_Event));
-      return true;
-    }
-    return false;
-  }
-
-private:
-  IEvent &m_Event;
-};
+#define MAKE_EVENT_CLASS_CATEGORY(category)                                    \
+  virtual int GetCategoryFlags() const override { return category; }

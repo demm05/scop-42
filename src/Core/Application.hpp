@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Window.h"
+#include "Layers/ILayer.hpp"
+#include "Window.hpp"
 #include <memory>
 
 class IEvent;
@@ -11,6 +12,7 @@ public:
 
   bool Init(const Window::Config &config);
   void Run();
+  void Stop();
   void Shutdown();
   void OnEvent(IEvent &e);
 
@@ -20,9 +22,11 @@ public:
 
 private:
   Application() = default;
+  static void errorCallback(int error, const char *description);
 
 private:
   std::unique_ptr<Window> window_;
+  std::unique_ptr<ILayer> gameLayer_;
   bool running_ = true;
 };
 

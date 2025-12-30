@@ -1,14 +1,10 @@
-#include "Window.h"
-#include "Events/KeyEvent.h"
-#include "Events/MouseEvent.h"
-#include "Events/WindowEvents.h"
-#include "WindowExceptions.h"
-#include <print>
-
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "Window.hpp"
+#include "Events/KeyEvent.hpp"
+#include "Events/MouseEvent.hpp"
+#include "Events/WindowEvents.hpp"
+#include "Platform/OpenGL/GLContext.hpp"
+#include "WindowExceptions.hpp"
+#include "sanatizer_suppresions.h"
 
 namespace {
 
@@ -83,6 +79,7 @@ void Window::init(const Config &config) {
   glfwSetCursorPosCallback(windowHandle_, MouseMoveCallback);
   glfwSetScrollCallback(windowHandle_, ScrollCallback);
   glfwSetFramebufferSizeCallback(windowHandle_, WindowResizeCallback);
+  glfwSetWindowCloseCallback(windowHandle_, WindowCloseCallback);
 }
 
 void Window::shutDown() {
@@ -196,4 +193,11 @@ void Window::WindowResizeCallback(GLFWwindow *window, int width, int height) {
   if (thisWindow->data_.EventCallback)
     thisWindow->data_.EventCallback(event);
 }
+
+void Window::WindowCloseCallback(GLFWwindow *window) {
+  GET_WINDOW_INSTANCE;
+  WindowCloseEvent event;
+  thisWindow->data_.EventCallback(event);
+}
+
 #undef GET_WINDOW_INSTANCE

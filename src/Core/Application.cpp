@@ -1,21 +1,13 @@
-#include "Window.h"
+#include "Core/Application.hpp"
+#include "Core/Logger.hpp"
+#include "Core/Window.hpp"
+#include "Events/EventDispatcher.hpp"
+#include "Events/IEvent.hpp"
+#include "Events/WindowEvents.hpp"
+#include "Layers/GameLayer.hpp"
+#include "Platform/OpenGL/GLContext.hpp"
 #include <exception>
-#include <print>
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
-#include "Application.h"
-#include "Events/IEvent.h"
-#include "Logger.h"
-#include "sanatizer_suppresions.h"
-
-namespace {
-static void error_callback(int error, const char *description) {
-  CORE_ERROR("GLFW({}): {}", error, description);
-}
-} // namespace
+#include <memory>
 
 Application &Application::Get() {
   static Application instance;
@@ -24,7 +16,7 @@ Application &Application::Get() {
 
 bool Application::Init(const Window::Config &config) {
   Logger::init();
-  glfwSetErrorCallback(error_callback);
+  glfwSetErrorCallback(errorCallback);
   if (!glfwInit()) {
     return false;
   }
@@ -42,20 +34,39 @@ bool Application::Init(const Window::Config &config) {
     return false;
   }
 
+  gameLayer_ = std::make_unique<GameLayer>();
+  gameLayer_->onAttach();
   return true;
 }
 
 void Application::Run() {
   while (running_ && !window_->ShouldClose()) {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    gameLayer_->onUpdate();
     window_->OnUpdate();
   }
 }
 
+void Application::Stop() { running_ = false; }
+
 void Application::Shutdown() {
+  gameLayer_->onDetach();
   window_.reset();
   glfwTerminate();
 }
 
-void Application::OnEvent(IEvent &e) { std::println("{}", e.GetName()); }
+void Application::OnEvent(IEvent &event) {
+  EventDispatcher dispatcher(event);
+
+  dispatcher.Dispatch<WindowCloseEvent>([this](auto &) {
+    Stop();
+    return true;
+  });
+
+  if (!event.Handled) {
+    gameLayer_->onEvent(event);
+  }
+}
+
+void Application::errorCallback(int error, const char *description) {
+  CORE_ERROR("GLFW({}): {}", error, description);
+}
