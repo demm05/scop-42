@@ -21,6 +21,8 @@ const char *__lsan_default_suppressions() {
          "leak:libglib-2.0.so\n"
          "leak:libdecor-gtk.so\n"
          "leak:libgobject-2.0.so\n"
+         "leak:libpciaccess.so\n"
+         "leak:libSPIRV-Tools.so\n"
          "leak:libnss_systemd.so\n";
 }
 
