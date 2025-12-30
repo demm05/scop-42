@@ -1,5 +1,5 @@
 #include "ObjectParser.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 #include "MappedFile.h"
 #include <cassert>
 #include <charconv>

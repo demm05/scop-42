@@ -23,6 +23,10 @@ const char *__lsan_default_suppressions() {
          "leak:libgobject-2.0.so\n";
 }
 
+extern "C" const char *__asan_default_options() {
+  return "print_suppressions=0";
+}
+
 #ifdef __cplusplus
 }
 #endif

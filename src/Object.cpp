@@ -1,5 +1,5 @@
 #include "Object.h"
-#include "ObjectParser.h"
+#include "Utils/ObjectParser.h"
 
 std::expected<Object, std::error_code>
 Object::parse(std::filesystem::path const &path) {
