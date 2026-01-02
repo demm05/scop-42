@@ -3,11 +3,14 @@
 #include "Core/Window.hpp"
 #include "Events/EventDispatcher.hpp"
 #include "Events/IEvent.hpp"
+#include "Events/KeyCodes.hpp"
+#include "Events/KeyEvent.hpp"
 #include "Events/WindowEvents.hpp"
 #include "Layers/GameLayer.hpp"
 #include "Platform/OpenGL/GLContext.hpp"
 #include <exception>
 #include <memory>
+#include <print>
 
 Application &Application::Get() {
   static Application instance;
@@ -46,7 +49,10 @@ void Application::Run() {
   }
 }
 
-void Application::Stop() { running_ = false; }
+void Application::Stop() {
+  running_ = false;
+  window_->Close();
+}
 
 void Application::Shutdown() {
   gameLayer_->onDetach();
@@ -59,6 +65,18 @@ void Application::OnEvent(IEvent &event) {
 
   dispatcher.Dispatch<WindowCloseEvent>([this](auto &) {
     Stop();
+    return true;
+  });
+
+  dispatcher.Dispatch<KeyPressEvent>([this](KeyPressEvent &e) {
+    // clang-format off
+    switch (e.Code) {
+      case KeyCode::M: window_->Maximize(); break;
+      case KeyCode::H: window_->Minimize(); break;
+      case KeyCode::F11: window_->ToggleFullscreen(); break;
+      default: return false;
+    }
+    // clang-format on
     return true;
   });
 

@@ -38,6 +38,10 @@ public:
   void Maximize();
   void Restore();
   void Close();
+  bool IsVisible() const;
+  void ToggleFullscreen();
+  void SetFullScreen(bool enable);
+  bool IsFullScreen() const;
 
   // bool IsKeyPressed(int keycode) const;
   // bool IsMouseButtonPressed(int button) const;
@@ -50,10 +54,12 @@ public:
 
 private:
   struct WindowData {
+    EventCallbackFn EventCallback;
     std::string Title;
     int Width, Height;
+    int WindowedPosX, WindowedPosY, WindowedWidth, WindowedHeight;
+    bool isFullScreen;
     bool VSync;
-    EventCallbackFn EventCallback;
   };
 
 private:
@@ -68,6 +74,7 @@ private:
   static void ScrollCallback(GLFWwindow *, double xoffset, double yoffset);
   static void WindowResizeCallback(GLFWwindow *, int width, int height);
   static void WindowCloseCallback(GLFWwindow *);
+  static void WindowIconifyCallback(GLFWwindow *, int iconified);
 
 private:
   GLFWwindow *windowHandle_ = nullptr;

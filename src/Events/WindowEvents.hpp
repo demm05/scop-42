@@ -16,3 +16,9 @@ struct WindowCloseEvent : public IEvent {
   MAKE_EVENT_CLASS_TYPE(WindowClose)
   MAKE_EVENT_CLASS_CATEGORY(EventCategory::Window);
 };
+
+struct WindowIconifyEvent : public IEvent {
+  WindowIconifyEvent() = default;
+  MAKE_EVENT_CLASS_TYPE(WindowIconify)
+  MAKE_EVENT_CLASS_CATEGORY(EventCategory::Window);
+};

@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "Core/Logger.hpp"
 #include "Events/KeyEvent.hpp"
 #include "Events/MouseEvent.hpp"
 #include "Events/WindowEvents.hpp"
@@ -33,13 +34,18 @@ static int GLFWToEngineMods(int glfwMods) {
 
 } // namespace
 
-Window::Window(const Window::Config &config) { init(config); }
+Window::Window(const Window::Config &config) {
+  data_ = {};
+  init(config);
+}
 Window::~Window() { shutDown(); }
 
 void Window::init(const Config &config) {
   data_.Title = config.Title;
   data_.Width = config.Width;
+  data_.WindowedWidth = data_.Width;
   data_.Height = config.Height;
+  data_.WindowedHeight = data_.Height;
   data_.VSync = config.VSync;
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, config.OpenGLVersionMajor);
@@ -80,6 +86,7 @@ void Window::init(const Config &config) {
   glfwSetScrollCallback(windowHandle_, ScrollCallback);
   glfwSetFramebufferSizeCallback(windowHandle_, WindowResizeCallback);
   glfwSetWindowCloseCallback(windowHandle_, WindowCloseCallback);
+  glfwSetWindowIconifyCallback(windowHandle_, WindowIconifyCallback);
 }
 
 void Window::shutDown() {
@@ -113,11 +120,50 @@ void Window::Close() { glfwSetWindowShouldClose(windowHandle_, 1); }
 bool Window::ShouldClose() const {
   return glfwWindowShouldClose(windowHandle_);
 }
+bool Window::IsVisible() const {
+  return glfwGetWindowAttrib(windowHandle_, GLFW_VISIBLE) &&
+         !glfwGetWindowAttrib(windowHandle_, GLFW_ICONIFIED);
+}
 
 void Window::OnUpdate() {
   glfwPollEvents();
   glfwSwapBuffers(windowHandle_);
 }
+
+// clang-format off
+void Window::SetFullScreen(bool enable) {
+  GLFWmonitor *monitor = glfwGetWindowMonitor(windowHandle_);
+  bool currentlyFull = (monitor != nullptr);
+
+  if (currentlyFull == enable)
+    return;
+
+  if (enable) {
+    glfwGetWindowSize(windowHandle_, &data_.WindowedWidth, &data_.WindowedHeight);
+    if (glfwGetPlatform() != GLFW_PLATFORM_WAYLAND) {
+      glfwGetWindowPos(windowHandle_, &data_.WindowedPosX, &data_.WindowedPosY);
+    }
+    GLFWmonitor *targetMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(targetMonitor);
+
+    glfwSetWindowMonitor(windowHandle_, targetMonitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
+    data_.isFullScreen = true;
+
+  } else {
+    int targetX = data_.WindowedPosX;
+    int targetY = data_.WindowedPosY;
+
+    if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
+      glfwSetWindowMonitor(windowHandle_, nullptr, 0, 0, data_.WindowedWidth, data_.WindowedHeight, 0);
+    } else {
+      glfwSetWindowMonitor(windowHandle_, nullptr, targetX, targetY, data_.WindowedWidth, data_.WindowedHeight, 0);
+    }
+    data_.isFullScreen = false;
+  }
+}
+// clang-format on
+
+void Window::ToggleFullscreen() { SetFullScreen(!data_.isFullScreen); }
 
 #define GET_WINDOW_INSTANCE                                                    \
   Window *thisWindow =                                                         \
@@ -188,8 +234,11 @@ void Window::ScrollCallback(GLFWwindow *window, double xoffset,
 }
 
 void Window::WindowResizeCallback(GLFWwindow *window, int width, int height) {
+  CORE_TRACE("WindowResizeCallback: {}:{}", width, height);
   GET_WINDOW_INSTANCE
   WindowResizeEvent event((unsigned int)width, (unsigned int)height);
+  thisWindow->data_.Width = width;
+  thisWindow->data_.Height = height;
   if (thisWindow->data_.EventCallback)
     thisWindow->data_.EventCallback(event);
 }
@@ -197,6 +246,13 @@ void Window::WindowResizeCallback(GLFWwindow *window, int width, int height) {
 void Window::WindowCloseCallback(GLFWwindow *window) {
   GET_WINDOW_INSTANCE;
   WindowCloseEvent event;
+  thisWindow->data_.EventCallback(event);
+}
+
+void Window::WindowIconifyCallback(GLFWwindow *window, int iconified) {
+  GET_WINDOW_INSTANCE;
+  CORE_TRACE("WindowIconifyCallback: {}", iconified);
+  WindowIconifyEvent event;
   thisWindow->data_.EventCallback(event);
 }
 
