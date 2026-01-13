@@ -253,7 +253,7 @@ void Window::WindowCloseCallback(GLFWwindow *window) {
   thisWindow->data_.EventCallback(event);
 }
 
-void Window::WindowIconifyCallback(GLFWwindow *window, int iconified) {
+void Window::WindowIconifyCallback(GLFWwindow *window, int /*iconified*/) {
   GET_WINDOW_INSTANCE;
   WindowIconifyEvent event;
   thisWindow->data_.EventCallback(event);

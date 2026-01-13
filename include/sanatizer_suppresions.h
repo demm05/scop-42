@@ -23,7 +23,11 @@ const char *__lsan_default_suppressions() {
          "leak:libgobject-2.0.so\n"
          "leak:libpciaccess.so\n"
          "leak:libSPIRV-Tools.so\n"
-         "leak:libnss_systemd.so\n";
+         "leak:libnss_systemd.so\n"
+         "leak:libX11.so\n"
+         "leak:libX11.so.6\n"
+         "leak:_XimOpenIM\n"
+         "leak:_XrmInternalStringToQuark\n";
 }
 
 extern "C" const char *__asan_default_options() {

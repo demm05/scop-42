@@ -1,3 +1,15 @@
----
 CompileFlags:
   Add: [-std=c++23, -Wall]
+  CompilationDatabase: "build"
+  query-driver: 
+    - /usr/bin/gcc
+    - /usr/bin/g++
+    - /usr/bin/cc
+    - /usr/bin/c++
+    - /sgoinfre/students/dmelnyk/pkg/pixi/bin/cc
+    - /sgoinfre/students/dmelnyk/pkg/pixi/bin/c++
+    - /sgoinfre/students/dmelnyk/pkg/pixi/bin/gcc
+    - /sgoinfre/students/dmelnyk/pkg/pixi/bin/g++
+
+Index:
+  Background: Build
