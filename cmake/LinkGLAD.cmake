@@ -4,7 +4,11 @@ message(STATUS "Fetching GLAD...")
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
-set(GLAD_PYTHON_EXECUTABLE "${Python3_EXECUTABLE}" CACHE FILEPATH "" FORCE)
+# Force GLAD to use the same Python interpreter as CMake
+# GLAD 2 internal CMake uses find_package(Python) and ${Python_EXECUTABLE}
+set(Python_EXECUTABLE "${Python3_EXECUTABLE}" CACHE FILEPATH "Python interpreter for GLAD" FORCE)
+set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}" CACHE FILEPATH "Python interpreter for GLAD" FORCE)
+set(GLAD_PYTHON_EXECUTABLE "${Python3_EXECUTABLE}" CACHE FILEPATH "Python interpreter for GLAD" FORCE)
 
 FetchContent_Declare(
     glad

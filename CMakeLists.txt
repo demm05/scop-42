@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME scop)
 
@@ -16,12 +16,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# Fix for library discovery on Ubuntu/Debian systems
+if(UNIX AND NOT APPLE)
+  list(APPEND CMAKE_LIBRARY_PATH /usr/lib/x86_64-linux-gnu)
+  list(APPEND CMAKE_INCLUDE_PATH /usr/include/x86_64-linux-gnu /usr/include)
+  
+  # Explicitly add these for the compiler if it's isolated (like in pixi/conda)
+  add_compile_options("-I/usr/include" "-I/usr/include/x86_64-linux-gnu")
+  add_link_options("-L/usr/lib/x86_64-linux-gnu")
+  add_link_options("-Wl,-rpath-link,/usr/lib/x86_64-linux-gnu")
+  add_link_options("-static-libstdc++" "-static-libgcc")
+  link_directories(/usr/lib/x86_64-linux-gnu)
+endif()
+
 include("cmake/LinkGLFW.cmake")
 include("cmake/LinkGLAD.cmake")
 include("cmake/LinkLinMath.cmake")
 include("cmake/LinkSpdlog.cmake")
 
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   add_compile_options(
