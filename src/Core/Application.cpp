@@ -37,6 +37,9 @@ bool Application::Init(const Window::Config &config) {
     return false;
   }
 
+  glViewport(0, 0, window_->Width(), window_->Height());
+  CORE_TRACE("{}:{} => {}:{}", config.Width, config.Height, window_->Width(),
+             window_->Height());
   gameLayer_ = std::make_unique<GameLayer>();
   gameLayer_->onAttach();
   return true;
@@ -67,6 +70,19 @@ void Application::OnEvent(IEvent &event) {
     Stop();
     return true;
   });
+
+  dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent &e) {
+    CORE_TRACE("{}: {}x{}", e.ToString(), e.Width, e.Height);
+    glViewport(0, 0, static_cast<int>(e.Width), static_cast<int>(e.Height));
+    return true;
+  });
+
+  dispatcher.Dispatch<WindowFrameBufferSizeEvent>(
+      [](WindowFrameBufferSizeEvent &e) {
+        CORE_TRACE("{}: {}x{}", e.ToString(), e.Width, e.Height);
+        glViewport(0, 0, static_cast<int>(e.Width), static_cast<int>(e.Height));
+        return true;
+      });
 
   dispatcher.Dispatch<KeyPressEvent>([this](KeyPressEvent &e) {
     // clang-format off

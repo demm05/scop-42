@@ -48,6 +48,7 @@ void Window::init(const Config &config) {
   data_.WindowedHeight = data_.Height;
   data_.VSync = config.VSync;
 
+  CORE_TRACE("Window: {}:{}", data_.Width, data_.Height);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, config.OpenGLVersionMajor);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, config.OpenGLVersionMinor);
   if (config.UseCoreProfile) {
@@ -62,7 +63,7 @@ void Window::init(const Config &config) {
   }
 
   windowHandle_ = glfwCreateWindow(data_.Width, data_.Height,
-                                   data_.Title.c_str(), nullptr, nullptr);
+                                   config.Title.c_str(), nullptr, nullptr);
 
   if (!windowHandle_) {
     const char *description;
@@ -75,6 +76,7 @@ void Window::init(const Config &config) {
                                            data_.Height);
   }
 
+  glfwGetFramebufferSize(windowHandle_, &data_.Width, &data_.Height);
   glfwMakeContextCurrent(windowHandle_);
   glfwSetWindowUserPointer(windowHandle_, &data_);
   SetVSync(data_.VSync);
@@ -87,6 +89,7 @@ void Window::init(const Config &config) {
   glfwSetFramebufferSizeCallback(windowHandle_, WindowResizeCallback);
   glfwSetWindowCloseCallback(windowHandle_, WindowCloseCallback);
   glfwSetWindowIconifyCallback(windowHandle_, WindowIconifyCallback);
+  glfwSetFramebufferSizeCallback(windowHandle_, WindowFrameBufferSizeCallback);
 }
 
 void Window::shutDown() {
@@ -164,6 +167,8 @@ void Window::SetFullScreen(bool enable) {
 // clang-format on
 
 void Window::ToggleFullscreen() { SetFullScreen(!data_.isFullScreen); }
+int Window::Width() const { return data_.Width; }
+int Window::Height() const { return data_.Height; }
 
 #define GET_WINDOW_INSTANCE                                                    \
   Window *thisWindow =                                                         \
@@ -234,7 +239,6 @@ void Window::ScrollCallback(GLFWwindow *window, double xoffset,
 }
 
 void Window::WindowResizeCallback(GLFWwindow *window, int width, int height) {
-  CORE_TRACE("WindowResizeCallback: {}:{}", width, height);
   GET_WINDOW_INSTANCE
   WindowResizeEvent event((unsigned int)width, (unsigned int)height);
   thisWindow->data_.Width = width;
@@ -251,8 +255,15 @@ void Window::WindowCloseCallback(GLFWwindow *window) {
 
 void Window::WindowIconifyCallback(GLFWwindow *window, int iconified) {
   GET_WINDOW_INSTANCE;
-  CORE_TRACE("WindowIconifyCallback: {}", iconified);
   WindowIconifyEvent event;
+  thisWindow->data_.EventCallback(event);
+}
+
+void Window::WindowFrameBufferSizeCallback(GLFWwindow *window, int width,
+                                           int height) {
+  GET_WINDOW_INSTANCE;
+  WindowFrameBufferSizeEvent event(static_cast<unsigned int>(width),
+                                   static_cast<unsigned int>(height));
   thisWindow->data_.EventCallback(event);
 }
 

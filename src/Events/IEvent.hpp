@@ -7,6 +7,7 @@ enum class EventType {
   WindowClose,
   WindowResize,
   WindowIconify,
+  WindowFrameBufferSize,
   KeyPressed,
   KeyReleased,
   KeyRepeat,

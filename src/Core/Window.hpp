@@ -42,6 +42,8 @@ public:
   void ToggleFullscreen();
   void SetFullScreen(bool enable);
   bool IsFullScreen() const;
+  int Width() const;
+  int Height() const;
 
   // bool IsKeyPressed(int keycode) const;
   // bool IsMouseButtonPressed(int button) const;
@@ -75,6 +77,7 @@ private:
   static void WindowResizeCallback(GLFWwindow *, int width, int height);
   static void WindowCloseCallback(GLFWwindow *);
   static void WindowIconifyCallback(GLFWwindow *, int iconified);
+  static void WindowFrameBufferSizeCallback(GLFWwindow *, int, int);
 
 private:
   GLFWwindow *windowHandle_ = nullptr;
