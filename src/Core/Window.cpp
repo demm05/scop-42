@@ -46,7 +46,8 @@ void Window::init(const Config &config) {
   data_.WindowedHeight = data_.Height;
   data_.VSync = config.VSync;
 
-  CORE_TRACE("Window: {}:{}", data_.Width, data_.Height);
+  CORE_INFO("Creating Window: {} ({}x{})", data_.Title, data_.Width, data_.Height);
+  CORE_TRACE("Initializing GLFW Window with OpenGL version {}.{}", config.OpenGLVersionMajor, config.OpenGLVersionMinor);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, config.OpenGLVersionMajor);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, config.OpenGLVersionMinor);
   if (config.UseCoreProfile) {
@@ -77,6 +78,7 @@ void Window::init(const Config &config) {
   glfwGetWindowSize(windowHandle_, &data_.Width, &data_.Height);
   glfwGetFramebufferSize(windowHandle_, &data_.FramebufferWidth,
                          &data_.FramebufferHeight);
+  CORE_TRACE("Actual window size: {}x{}, Framebuffer size: {}x{}", data_.Width, data_.Height, data_.FramebufferWidth, data_.FramebufferHeight);
   glfwMakeContextCurrent(windowHandle_);
   glfwSetWindowUserPointer(windowHandle_, &data_);
   SetVSync(data_.VSync);
@@ -94,6 +96,7 @@ void Window::init(const Config &config) {
 
 void Window::shutDown() {
   if (windowHandle_) {
+    CORE_INFO("Destroying Window: {}", data_.Title);
     glfwDestroyWindow(windowHandle_);
     windowHandle_ = nullptr;
   }
