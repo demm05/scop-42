@@ -174,6 +174,22 @@ int Window::Height() const { return data_.Height; }
 int Window::FramebufferWidth() const { return data_.FramebufferWidth; }
 int Window::FramebufferHeight() const { return data_.FramebufferHeight; }
 
+bool Window::IsKeyPressed(KeyCode keycode) const {
+  int state = glfwGetKey(windowHandle_, static_cast<int>(keycode));
+  return state == GLFW_PRESS || state == GLFW_REPEAT;
+}
+
+bool Window::IsMouseButtonPressed(MouseCode button) const {
+  int state = glfwGetMouseButton(windowHandle_, static_cast<int>(button));
+  return state == GLFW_PRESS;
+}
+
+std::pair<float, float> Window::GetMousePosition() const {
+  double xpos, ypos;
+  glfwGetCursorPos(windowHandle_, &xpos, &ypos);
+  return {static_cast<float>(xpos), static_cast<float>(ypos)};
+}
+
 #define GET_WINDOW_INSTANCE                                                    \
   Window *thisWindow =                                                         \
       static_cast<Window *>(glfwGetWindowUserPointer(window));                 \

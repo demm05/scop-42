@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Events/KeyCodes.hpp"
+#include "Events/MouseCode.hpp"
 #include <functional>
 #include <string>
+#include <utility>
 
 class IEvent;
 struct GLFWwindow;
@@ -49,9 +52,9 @@ public:
   int FramebufferWidth() const;
   int FramebufferHeight() const;
 
-  // bool IsKeyPressed(int keycode) const;
-  // bool IsMouseButtonPressed(int button) const;
-  // std::pair<float, float> GetMousePosition() const;
+  bool IsKeyPressed(KeyCode keycode) const;
+  bool IsMouseButtonPressed(MouseCode button) const;
+  std::pair<float, float> GetMousePosition() const;
 
 public:
   Window(const Window &) = delete;
