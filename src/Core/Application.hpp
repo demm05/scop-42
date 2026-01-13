@@ -28,6 +28,10 @@ private:
   std::unique_ptr<Window> window_;
   std::unique_ptr<ILayer> gameLayer_;
   bool running_ = true;
+
+  unsigned int m_ViewportWidth = 0;
+  unsigned int m_ViewportHeight = 0;
+  bool m_ViewportDirty = false;
 };
 
 /*

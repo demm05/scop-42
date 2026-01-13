@@ -1,11 +1,9 @@
 #include "Window.hpp"
 #include "Core/Logger.hpp"
-#include "Events/KeyEvent.hpp"
-#include "Events/MouseEvent.hpp"
-#include "Events/WindowEvents.hpp"
+#include "Events/Events.hpp"
 #include "Platform/OpenGL/GLContext.hpp"
 #include "WindowExceptions.hpp"
-#include "sanatizer_suppresions.h"
+#include "sanatizer_suppresions.h" // IWYU pragma: keep
 
 namespace {
 
@@ -76,7 +74,9 @@ void Window::init(const Config &config) {
                                            data_.Height);
   }
 
-  glfwGetFramebufferSize(windowHandle_, &data_.Width, &data_.Height);
+  glfwGetWindowSize(windowHandle_, &data_.Width, &data_.Height);
+  glfwGetFramebufferSize(windowHandle_, &data_.FramebufferWidth,
+                         &data_.FramebufferHeight);
   glfwMakeContextCurrent(windowHandle_);
   glfwSetWindowUserPointer(windowHandle_, &data_);
   SetVSync(data_.VSync);
@@ -86,7 +86,7 @@ void Window::init(const Config &config) {
   glfwSetMouseButtonCallback(windowHandle_, MouseButtonCallback);
   glfwSetCursorPosCallback(windowHandle_, MouseMoveCallback);
   glfwSetScrollCallback(windowHandle_, ScrollCallback);
-  glfwSetFramebufferSizeCallback(windowHandle_, WindowResizeCallback);
+  glfwSetWindowSizeCallback(windowHandle_, WindowResizeCallback);
   glfwSetWindowCloseCallback(windowHandle_, WindowCloseCallback);
   glfwSetWindowIconifyCallback(windowHandle_, WindowIconifyCallback);
   glfwSetFramebufferSizeCallback(windowHandle_, WindowFrameBufferSizeCallback);
@@ -129,9 +129,11 @@ bool Window::IsVisible() const {
 }
 
 void Window::OnUpdate() {
-  glfwPollEvents();
-  glfwSwapBuffers(windowHandle_);
+  PollEvents();
+  SwapBuffers();
 }
+void Window::PollEvents() { glfwPollEvents(); }
+void Window::SwapBuffers() { glfwSwapBuffers(windowHandle_); }
 
 // clang-format off
 void Window::SetFullScreen(bool enable) {
@@ -169,6 +171,8 @@ void Window::SetFullScreen(bool enable) {
 void Window::ToggleFullscreen() { SetFullScreen(!data_.isFullScreen); }
 int Window::Width() const { return data_.Width; }
 int Window::Height() const { return data_.Height; }
+int Window::FramebufferWidth() const { return data_.FramebufferWidth; }
+int Window::FramebufferHeight() const { return data_.FramebufferHeight; }
 
 #define GET_WINDOW_INSTANCE                                                    \
   Window *thisWindow =                                                         \
@@ -240,9 +244,9 @@ void Window::ScrollCallback(GLFWwindow *window, double xoffset,
 
 void Window::WindowResizeCallback(GLFWwindow *window, int width, int height) {
   GET_WINDOW_INSTANCE
-  WindowResizeEvent event((unsigned int)width, (unsigned int)height);
   thisWindow->data_.Width = width;
   thisWindow->data_.Height = height;
+  WindowResizeEvent event((unsigned int)width, (unsigned int)height);
   if (thisWindow->data_.EventCallback)
     thisWindow->data_.EventCallback(event);
 }
@@ -262,6 +266,8 @@ void Window::WindowIconifyCallback(GLFWwindow *window, int /*iconified*/) {
 void Window::WindowFrameBufferSizeCallback(GLFWwindow *window, int width,
                                            int height) {
   GET_WINDOW_INSTANCE;
+  thisWindow->data_.FramebufferWidth = width;
+  thisWindow->data_.FramebufferHeight = height;
   WindowFrameBufferSizeEvent event(static_cast<unsigned int>(width),
                                    static_cast<unsigned int>(height));
   thisWindow->data_.EventCallback(event);

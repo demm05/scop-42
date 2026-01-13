@@ -1,8 +1,7 @@
 #include "Layers/GameLayer.hpp"
 #include "Core/Application.hpp"
 #include "Core/Logger.hpp"
-#include "Events/EventDispatcher.hpp"
-#include "Events/KeyEvent.hpp"
+#include "Events/Events.hpp"
 #include "Platform/OpenGL/GLContext.hpp"
 #include <expected>
 #include <math.h>

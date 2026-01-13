@@ -1,16 +1,11 @@
 #include "Core/Application.hpp"
 #include "Core/Logger.hpp"
 #include "Core/Window.hpp"
-#include "Events/EventDispatcher.hpp"
-#include "Events/IEvent.hpp"
-#include "Events/KeyCodes.hpp"
-#include "Events/KeyEvent.hpp"
-#include "Events/WindowEvents.hpp"
+#include "Events/Events.hpp"
 #include "Layers/GameLayer.hpp"
 #include "Platform/OpenGL/GLContext.hpp"
 #include <exception>
 #include <memory>
-#include <print>
 
 Application &Application::Get() {
   static Application instance;
@@ -37,9 +32,12 @@ bool Application::Init(const Window::Config &config) {
     return false;
   }
 
-  glViewport(0, 0, window_->Width(), window_->Height());
-  CORE_TRACE("{}:{} => {}:{}", config.Width, config.Height, window_->Width(),
-             window_->Height());
+  m_ViewportWidth = window_->FramebufferWidth();
+  m_ViewportHeight = window_->FramebufferHeight();
+  glViewport(0, 0, static_cast<int>(m_ViewportWidth),
+             static_cast<int>(m_ViewportHeight));
+  CORE_TRACE("{}:{} => {}:{}", config.Width, config.Height, m_ViewportWidth,
+             m_ViewportHeight);
   gameLayer_ = std::make_unique<GameLayer>();
   gameLayer_->onAttach();
   return true;
@@ -47,8 +45,14 @@ bool Application::Init(const Window::Config &config) {
 
 void Application::Run() {
   while (running_ && !window_->ShouldClose()) {
+    window_->PollEvents();
+    if (m_ViewportDirty) {
+      glViewport(0, 0, static_cast<int>(m_ViewportWidth),
+                 static_cast<int>(m_ViewportHeight));
+      m_ViewportDirty = false;
+    }
     gameLayer_->onUpdate();
-    window_->OnUpdate();
+    window_->SwapBuffers();
   }
 }
 
@@ -73,14 +77,15 @@ void Application::OnEvent(IEvent &event) {
 
   dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent &e) {
     CORE_TRACE("{}: {}x{}", e.ToString(), e.Width, e.Height);
-    glViewport(0, 0, static_cast<int>(e.Width), static_cast<int>(e.Height));
     return true;
   });
 
   dispatcher.Dispatch<WindowFrameBufferSizeEvent>(
-      [](WindowFrameBufferSizeEvent &e) {
+      [this](WindowFrameBufferSizeEvent &e) {
         CORE_TRACE("{}: {}x{}", e.ToString(), e.Width, e.Height);
-        glViewport(0, 0, static_cast<int>(e.Width), static_cast<int>(e.Height));
+        m_ViewportWidth = e.Width;
+        m_ViewportHeight = e.Height;
+        m_ViewportDirty = true;
         return true;
       });
 

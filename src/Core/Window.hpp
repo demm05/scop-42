@@ -25,6 +25,8 @@ public:
   Window(const Config &config);
 
   void OnUpdate();
+  void PollEvents();
+  void SwapBuffers();
   bool ShouldClose() const;
 
   void SetEventCallback(const EventCallbackFn &callback);
@@ -44,6 +46,8 @@ public:
   bool IsFullScreen() const;
   int Width() const;
   int Height() const;
+  int FramebufferWidth() const;
+  int FramebufferHeight() const;
 
   // bool IsKeyPressed(int keycode) const;
   // bool IsMouseButtonPressed(int button) const;
@@ -59,6 +63,7 @@ private:
     EventCallbackFn EventCallback;
     std::string Title;
     int Width, Height;
+    int FramebufferWidth, FramebufferHeight;
     int WindowedPosX, WindowedPosY, WindowedWidth, WindowedHeight;
     bool isFullScreen;
     bool VSync;
