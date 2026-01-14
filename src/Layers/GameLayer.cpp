@@ -5,7 +5,6 @@
 #include "Platform/OpenGL/GLContext.hpp"
 #include <expected>
 #include <math.h>
-#include <print>
 #include <string_view>
 
 std::expected<unsigned int, std::string> createShader(std::string_view source,
@@ -83,15 +82,21 @@ void GameLayer::onAttach() {
   }
   m_ShaderProgram = *x;
 
+  // clang-format off
   float vertices[] = {
-      0.5f,  0.5f,  0.0f, // top right
-      0.5f,  -0.5f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f  // top left
+      -1.f,   0.f, -0.2f,
+
+      .0f,   1.f, -0.2f,
+
+      1.0f,   0.f, -0.2f,
+
+      .0f,   -1.f, 0.f,
   };
+  // clang-format on 
+
   unsigned int indices[] = {
-      0, 1, 3, // first triangle
-      1, 2, 3  // second triangle
+    0, 1, 2,
+    0, 2, 3
   };
 
   unsigned int EBO;
@@ -119,11 +124,10 @@ void GameLayer::onUpdate() {
 
   glUseProgram(m_ShaderProgram);
   glBindVertexArray(m_VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  // glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, 0);
-  // glBindVertexArray(0);
+  glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
 }
+
 void GameLayer::onDetach() {
   glDeleteVertexArrays(1, &m_VAO);
   glDeleteBuffers(1, &m_VBO);
@@ -132,7 +136,6 @@ void GameLayer::onDetach() {
 
 void GameLayer::onEvent(IEvent &event) {
   EventDispatcher dispatcher(event);
-  std::println("{}", event.GetName());
 
   dispatcher.Dispatch<KeyPressEvent>([](KeyPressEvent &e) {
     if (e.Code == KeyCode::Escape) {
