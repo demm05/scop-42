@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Mesh.hpp"
+#include <expected>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -13,11 +14,16 @@
  */
 class Model {
 public:
+  using ModelResult = std::expected<Model, std::string>;
+
   /**
    * @brief Loads a model file (like .obj) via the ObjectParser.
    * @param path Path to the .obj file.
    */
-  Model(std::filesystem::path const &path);
+  static ModelResult Load(std::filesystem::path const &path);
+
+public:
+  Model() = default;
 
   /** @brief Returns all meshes belonging to this model. */
   const std::vector<Mesh> &GetMeshes() const { return m_Meshes; }

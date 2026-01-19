@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <glm/glm.hpp>
 #include "Math/Math.hpp"
 #include <vector>
 
@@ -8,7 +7,7 @@
  * @brief Basic layout of a single point in 3D space.
  */
 struct Vertex {
-  Vec3 Position;  /**< x, y, z coordinates */
+  Vec4 Position;  /**< x, y, z coordinates */
   Vec3 Normal;    /**< Surface direction for lighting */
   Vec2 TexCoords; /**< u, v coordinates for mapping textures */
 };

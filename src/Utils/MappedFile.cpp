@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <utility>
 
 std::expected<MappedFile, std::error_code>
 MappedFile::open(std::filesystem::path const &path) {
@@ -39,14 +40,14 @@ MappedFile::~MappedFile() { cleanup(); }
 MappedFile::MappedFile(MappedFile &&other) noexcept
     : length_(other.length_), data_(other.data_) {
   other.data_ = {};
+  other.length_ = 0;
 }
 
 MappedFile &MappedFile::operator=(MappedFile &&other) noexcept {
   if (this != &other) {
     cleanup();
-    length_ = other.length_;
-    data_ = other.data_;
-    other.data_ = {};
+    data_ = std::exchange(other.data_, {});
+    length_ = std::exchange(other.length_, 0);
   }
   return *this;
 }

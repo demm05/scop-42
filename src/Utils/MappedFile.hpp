@@ -7,9 +7,11 @@
 
 struct MappedFile {
 public:
-  static std::expected<MappedFile, std::error_code>
-  open(std::filesystem::path const &path);
-  std::string_view view() const;
+  using Result = std::expected<MappedFile, std::error_code>;
+  [[nodiscard]] static Result open(std::filesystem::path const &path);
+
+public:
+  [[nodiscard]] std::string_view view() const;
   size_t length() const;
 
 public:

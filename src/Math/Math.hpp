@@ -49,6 +49,10 @@ struct Vec4 {
   Vec4(const Vec3 &v, float w);
 
   float Dot(const Vec4 &other) const;
+
+public:
+  float &operator[](int);
+  float operator[](int) const;
 };
 
 /**

@@ -1,5 +1,8 @@
 #include "Utils/ObjectParser.hpp"
 #include "Core/Logger.hpp"
+#include "Math/Math.hpp"
+#include "Renderer/Mesh.hpp"
+#include "Renderer/Model.hpp"
 #include "Utils/MappedFile.hpp"
 #include <cassert>
 #include <charconv>
@@ -22,20 +25,21 @@ constexpr uint32_t hash(std::string_view sv) {
 
 } // namespace
 
-std::expected<Model, std::error_code>
-ObjectParser::parse(std::filesystem::path const &path) {
-  auto file = MappedFile::open(path);
-  if (!file)
-    return std::unexpected(file.error());
-  ObjectParser op(path, file.value().view());
-  return op.parse();
+Model::ModelResult ObjectParser::parse(std::filesystem::path const &path) {
+  auto fileResult = MappedFile::open(path);
+  if (!fileResult)
+    return std::unexpected(fileResult.error().message());
+
+  auto &mappedFile = fileResult.value();
+  std::string_view buffer = mappedFile.view();
+  return ObjectParser(path, buffer).parse();
 }
 
 ObjectParser::ObjectParser(std::filesystem::path const &filePath,
                            std::string_view file)
-    : filePath_(filePath), file_(file), model_(filePath) {}
+    : filePath_(filePath), file_(file), model_() {}
 
-std::expected<Model, std::error_code> ObjectParser::parse() {
+Model::ModelResult ObjectParser::parse() {
   for (auto const line_range : file_ | std::views::split('\n')) {
     lineNum_++;
     line_ = std::string_view(line_range.begin(), line_range.end());
@@ -100,33 +104,63 @@ void ObjectParser::handleVertex() {
   char const *first = data_.data();
   char const *last = data_.data() + data_.size();
 
-  // Temporary simplified loading for now, as Vertex struct in Mesh.hpp expects
-  // 3 floats (Vec3) and we were parsing 4. The user asked not to finish
-  // implementing mesh population perfectly. We'll just parse to ensure code
-  // validity but might not fully populate a final Mesh::Vertex yet.
-
-  float v[4]{0.0f, 0.0f, 0.0f, 1.0f};
+  Vertex v;
 
   for (int i = 0; i < 4; ++i) {
     first = skip_spaces(first, last);
     if (first == last) {
-      // 3 coordinates are enough
       PARSE_CHECK(i >= 3, line_.length(), "Missing coordinates");
       break;
     }
 
-    auto [ptr, ec] = std::from_chars(first, last, v[i]);
+    auto [ptr, ec] = std::from_chars(first, last, v.Position[i]);
     PARSE_CHECK(ec == std::errc{}, first - line_.data(),
                 std::make_error_code(ec).message());
     first = ptr;
   }
-  // TODO: Add to temporary vertex storage or directly to current mesh being
-  // built
+  uint32_t const vertexIndex = allVertices_.size();
+  allVertices_[vertexIndex] = v;
+  meshVertices_.push_back(vertexIndex);
 }
 
 void ObjectParser::handleFace() {
-  // Parsing logic kept but Mesh population deferred
+  char const *first = data_.data();
+  char const *last = data_.data() + data_.size();
+
+  static std::vector<uint32_t> rawIndices(4);
+  rawIndices.clear();
+
+  while (first < last) {
+    first = skip_spaces(first, last);
+    if (first == last)
+      break;
+
+    uint32_t index;
+    auto [ptr, ec] = std::from_chars(first, last, index);
+
+    PARSE_CHECK(ec == std::errc{}, first - line_.data(),
+                std::make_error_code(ec).message());
+    PARSE_CHECK(index > 0, first - line_.data(), "The indexing starts from 1");
+
+    rawIndices.push_back(index - 1);
+    first = ptr;
+  }
+
+  size_t const indicesCount = rawIndices.size();
+  PARSE_CHECK(indicesCount >= 3, line_.length(),
+              "A face must have at least 3 vertices");
+  if (indicesCount == 3) {
+    meshIndices_.insert(meshIndices_.end(), rawIndices.begin(),
+                        rawIndices.end());
+  } else {
+    for (size_t i = 1; i < indicesCount - 1; ++i) {
+      meshIndices_.push_back(rawIndices[0]);
+      meshIndices_.push_back(rawIndices[i]);
+      meshIndices_.push_back(rawIndices[i + 1]);
+    }
+  }
 }
+
 void ObjectParser::handleObjectName() {}
 void ObjectParser::handleGroupName() {}
 void ObjectParser::handleSmoothingGroup() {}
