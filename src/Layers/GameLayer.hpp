@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Layers/ILayer.hpp"
-#include "Renderer/Mesh.hpp"
+#include "Renderer/Model.hpp"
 #include "Renderer/Shader.hpp"
 #include <memory>
 
@@ -17,5 +17,5 @@ public:
 
 private:
   std::unique_ptr<Shader> m_Shader;
-  std::unique_ptr<Mesh> m_Mesh;
+  std::unique_ptr<Model> m_Model;
 };

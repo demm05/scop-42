@@ -33,6 +33,12 @@ public:
 
   ~Mesh();
 
+  Mesh(Mesh &&other) noexcept;
+  Mesh &operator=(Mesh &&other) noexcept;
+
+  Mesh(const Mesh &) = delete;
+  Mesh &operator=(const Mesh &) = delete;
+
 private:
   uint32_t m_VAO, m_VBO, m_EBO;
   uint32_t m_IndexCount;

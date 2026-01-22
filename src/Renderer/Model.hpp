@@ -24,6 +24,13 @@ public:
 
 public:
   Model() = default;
+  ~Model() = default;
+
+  Model(Model &&) noexcept = default;
+  Model &operator=(Model &&) noexcept = default;
+
+  Model(const Model &) = delete;
+  Model &operator=(const Model &) = delete;
 
   /** @brief Returns all meshes belonging to this model. */
   const std::vector<Mesh> &GetMeshes() const { return m_Meshes; }

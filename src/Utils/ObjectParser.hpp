@@ -2,7 +2,6 @@
 #include "Renderer/Model.hpp"
 #include <filesystem>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 class ObjectParser {
@@ -33,7 +32,7 @@ private:
   size_t lineNum_ = 0;
 
   Model model_;
-  std::unordered_map<uint32_t, Vertex> allVertices_;
+  std::vector<Vertex> allVertices_;
   std::vector<uint32_t> meshVertices_;
   std::vector<uint32_t> meshIndices_;
 };

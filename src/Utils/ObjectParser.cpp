@@ -58,7 +58,12 @@ Model::ModelResult ObjectParser::parse() {
       continue;
     dispatchHandler();
   }
-  return model_;
+
+  if (!meshIndices_.empty()) {
+    model_.m_Meshes.emplace_back(allVertices_, meshIndices_);
+  }
+
+  return std::move(model_);
 }
 
 void ObjectParser::dispatchHandler() {
@@ -105,6 +110,7 @@ void ObjectParser::handleVertex() {
   char const *last = data_.data() + data_.size();
 
   Vertex v;
+  v.Position = Vec4(0.0f, 0.0f, 0.0f, 1.0f); // default w=1
 
   for (int i = 0; i < 4; ++i) {
     first = skip_spaces(first, last);
@@ -118,9 +124,8 @@ void ObjectParser::handleVertex() {
                 std::make_error_code(ec).message());
     first = ptr;
   }
-  uint32_t const vertexIndex = allVertices_.size();
-  allVertices_[vertexIndex] = v;
-  meshVertices_.push_back(vertexIndex);
+
+  allVertices_.push_back(v);
 }
 
 void ObjectParser::handleFace() {
