@@ -2,6 +2,7 @@
 
 #include "Layers/ILayer.hpp"
 #include "Renderer/Mesh.hpp"
+#include "Renderer/Shader.hpp"
 #include <memory>
 
 class GameLayer : public ILayer {
@@ -15,6 +16,6 @@ public:
   virtual void onEvent(IEvent &event) override;
 
 private:
-  unsigned int m_ShaderProgram = 0;
+  std::unique_ptr<Shader> m_Shader;
   std::unique_ptr<Mesh> m_Mesh;
 };
