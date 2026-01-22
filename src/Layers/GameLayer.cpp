@@ -82,55 +82,28 @@ void GameLayer::onAttach() {
   }
   m_ShaderProgram = *x;
 
-  // clang-format off
-  float vertices[] = {
-      -1.f,   0.f, -0.2f,
+  std::vector<Vertex> vertices = {
+      {{-1.0f, 0.0f, -0.2f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+      {{0.0f, 1.0f, -0.2f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+      {{1.0f, 0.0f, -0.2f, 1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+      {{0.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}};
 
-      .0f,   1.f, -0.2f,
+  std::vector<uint32_t> indices = {0, 1, 2};
 
-      1.0f,   0.f, -0.2f,
-
-      .0f,   -1.f, 0.f,
-  };
-  // clang-format on 
-
-  unsigned int indices[] = {
-    0, 1, 2,
-    0, 2, 3
-  };
-
-  unsigned int EBO;
-
-  glGenVertexArrays(1, &m_VAO);
-  glGenBuffers(1, &m_VBO);
-  glGenBuffers(1, &EBO);
-
-  // 1. bind Vertex Array Object
-  glBindVertexArray(m_VAO);
-  // 2. copy our vertices array in a vertex buffer for OpenGL to use
-  glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  // 3. copy our index array in a element buffer for OpenGL to use
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
-  // 4. then set the vertex attributes pointers
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
+  m_Mesh = std::make_unique<Mesh>(vertices, indices);
 }
 
 void GameLayer::onUpdate() {
   glClear(GL_COLOR_BUFFER_BIT);
 
   glUseProgram(m_ShaderProgram);
-  glBindVertexArray(m_VAO);
-  glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-  glBindVertexArray(0);
+  if (m_Mesh) {
+    m_Mesh->Draw();
+  }
 }
 
 void GameLayer::onDetach() {
-  glDeleteVertexArrays(1, &m_VAO);
-  glDeleteBuffers(1, &m_VBO);
+  m_Mesh.reset();
   glDeleteProgram(m_ShaderProgram);
 }
 

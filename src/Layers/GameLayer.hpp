@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Layers/ILayer.hpp"
+#include "Renderer/Mesh.hpp"
+#include <memory>
 
 class GameLayer : public ILayer {
 public:
@@ -14,6 +16,5 @@ public:
 
 private:
   unsigned int m_ShaderProgram = 0;
-  unsigned int m_VAO = 0;
-  unsigned int m_VBO = 0;
+  std::unique_ptr<Mesh> m_Mesh;
 };

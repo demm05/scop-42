@@ -31,6 +31,8 @@ public:
   /** @brief Triggers the glDrawElements call for this specific geometry. */
   void Draw() const;
 
+  ~Mesh();
+
 private:
   uint32_t m_VAO, m_VBO, m_EBO;
   uint32_t m_IndexCount;
